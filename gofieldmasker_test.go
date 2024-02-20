@@ -1,4 +1,4 @@
-package gofieldmasker
+package go_ufm
 
 import (
 	"testing"
@@ -6,30 +6,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type TestStruct struct {
-	Name string `gmm:"name>first_name"`
-	Age  int    `gmm:"age"`
-}
-
-func TestMain(t *testing.T) {
-	s := &TestStruct{
-		Name: "Foo",
-		Age:  28,
-	}
-	mask := []string{"name", "age"}
-	updateMask := GetFieldMaskerValues(s, mask)
-	expected := map[string]any{
-		"first_name": "Foo",
-		"age":        28,
-	}
-	assert.Equal(t, expected, updateMask)
-}
-
 type FullTestStruct struct {
-	ID        string
-	FirstName string `gmm:"firstName>first_name"`
-	LastName  string `gmm:"lastName>last_name"`
-	Email     string `gmm:"email"`
+	ID        string `db:"id"`
+	FirstName string `db:"first_name" ufm:"firstName"`
+	LastName  string `db:"last_name" ufm:"lastName"`
+	Email     string `db:"email" ufm:"email"`
 }
 
 func TestFullStruct(t *testing.T) {
@@ -47,4 +28,32 @@ func TestFullStruct(t *testing.T) {
 		"email":      "foobar@email.com",
 	}
 	assert.Equal(t, expected, updateM)
+}
+
+func TestIDPass(t *testing.T) {
+	test := &FullTestStruct{
+		ID:        "1",
+		FirstName: "Foo",
+		LastName:  "Bar",
+		Email:     "foobar@email.com",
+	}
+	mask := []string{"id", "firstName"}
+	update := GetFieldMaskerValues(test, mask)
+	expected := map[string]any{
+		"first_name": "Foo",
+	}
+	assert.Equal(t, expected, update)
+}
+
+func TestNoMask(t *testing.T) {
+	test := &FullTestStruct{
+		ID:        "1",
+		FirstName: "Foo",
+		LastName:  "Bar",
+		Email:     "foobar@email.com",
+	}
+	mask := []string{}
+	update := GetFieldMaskerValues(test, mask)
+	expected := map[string]any{}
+	assert.Equal(t, expected, update)
 }

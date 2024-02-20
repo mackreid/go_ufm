@@ -1,4 +1,4 @@
-module github.com/mackreid/gomaskmapper
+module github.com/mackreid/go_ufm
 
 go 1.21.0
 
